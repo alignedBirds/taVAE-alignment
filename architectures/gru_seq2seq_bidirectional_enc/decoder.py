@@ -34,9 +34,7 @@ class AutoregressiveDecoder(Decoder, nn.Module):
         h = self.proj_h(z).unsqueeze(0)
 
         x = None
-
         outputs = []
-
         for _ in range(self.context_length):
             x, h = self.step(h, x)
             outputs.append(x.squeeze(1))
