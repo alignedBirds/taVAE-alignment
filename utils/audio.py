@@ -2,6 +2,7 @@ import os
 import numpy as np
 import torch
 import soundfile as sf
+import sounddevice as sd
 from scipy import signal
 
 
@@ -57,3 +58,31 @@ def reverse_FT(Y):
     
     return torch.complex(real, imag)
 
+
+def play_audio(waveform, sample_rate=16000, duration=5):
+    if isinstance(waveform, torch.Tensor):
+        waveform = waveform.detach().cpu().numpy()
+    
+    if waveform.ndim > 1:
+        waveform = np.squeeze(waveform)
+    
+    max_samples = sample_rate * duration
+    waveform = waveform[:max_samples]
+
+    waveform = waveform.astype(np.float32)
+
+    sd.play(waveform, samplerate=sample_rate)
+    sd.wait()
+
+
+def get_waveform_from_spectrogram_tensor(X: torch.Tensor, stft_params: dict) -> np.ndarray:
+    X = X.squeeze(0).permute(1, 0)
+    X_np = X.numpy()
+
+    _, waveform = signal.istft(X_np,
+                               fs=stft_params['fs'],
+                               nperseg=stft_params['window_size'],
+                               noverlap=stft_params['window_size'] - stft_params['window_shift'],
+                               window=stft_params['type'])
+    
+    return waveform
