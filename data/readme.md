@@ -1,1 +1,1 @@
-Deposit your dataset here!
+Deposit the dataset here, inside of a directory called raw_data
