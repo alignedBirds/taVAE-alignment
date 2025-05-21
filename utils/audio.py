@@ -42,3 +42,18 @@ def get_spectrogram_tensor(waveform, stft_params):
     X = X.permute(1, 0)
     return X.unsqueeze(0) 
 
+
+def concat_FT(X):
+    real = X.real
+    imag = X.imag
+
+    return torch.cat([real, imag], dim=-1)
+
+
+def reverse_FT(Y):
+    half = Y.shape[-1] // 2
+    real = Y[..., :half]
+    imag = Y[..., half:]
+    
+    return torch.complex(real, imag)
+
