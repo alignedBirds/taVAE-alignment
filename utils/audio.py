@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import torch
 import soundfile as sf
 from scipy import signal
 
@@ -36,4 +37,8 @@ def get_spectrogram_tensor(waveform, stft_params):
                               nperseg=win_size, noverlap=win_size - win_shift, window=win_type)
         X[:, :Z.shape[1], ch] = Z
 
-    return X
+    X = torch.tensor(X)
+    X = X.squeeze(-1)
+    X = X.permute(1, 0)
+    return X.unsqueeze(0) 
+
