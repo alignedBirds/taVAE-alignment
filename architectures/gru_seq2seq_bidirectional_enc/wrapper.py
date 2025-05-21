@@ -19,7 +19,6 @@ class WrapperGRU(Wrapper, nn.Module):
                 target: Optional[Tensor] = None,
                 teacher_forcing: Optional[int] = 0) -> Tensor:
         
-        x = self.model.embedding(x)
         mu, logvar = self.model.encode(x)
         z = self.model.reparametrize(mu, logvar)
 
@@ -31,13 +30,13 @@ class WrapperGRU(Wrapper, nn.Module):
             if i == 0:
                 output, h = self.model.decoder.step(h, None)
             else:
+                if output.dim() == 2:
+                    output = output.unsqueeze(1)
                 output, h = self.model.decoder.step(h, output)
 
             outputs.append(output)
 
-            if not self.teacher_forcing(target, teacher_forcing, i):
-                output = output.squeeze(1)
-            else:
+            if self.teacher_forcing(target, teacher_forcing, i):
                 output = target[:, i]
 
         return torch.cat(outputs, dim=1), mu, logvar
